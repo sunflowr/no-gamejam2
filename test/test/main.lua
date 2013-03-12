@@ -6,7 +6,7 @@ ANTIALIASING = 0
 
 PHYS_SCALE = 64
 
-require "entity"
+require "player"
 
 function love.load()
 	-- Setup physics.
@@ -24,13 +24,6 @@ function love.load()
 	objects.ground.shape = love.physics.newRectangleShape(SCREEN_WIDTH, 50)
 	objects.ground.fixture = love.physics.newFixture(objects.ground.body, objects.ground.shape)
 
-	-- Create a ball.
-	objects.ball = {}
-	objects.ball.body = love.physics.newBody(world, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, "dynamic")
-	objects.ball.shape = love.physics.newCircleShape(20)
-	objects.ball.fixture = love.physics.newFixture(objects.ball.body, objects.ball.shape, 1)
-	objects.ball.fixture:setRestitution(0.1)
-
 	-- Initilize graphics.
 	love.graphics.setBackgroundColor(134, 166, 248)
 	love.graphics.setMode(SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN, VSYNC, ANTIALIASING)
@@ -40,9 +33,7 @@ function love.load()
 	-- Setup player.
 	--player = entity.create()
 	--player.init()
-	player = {}
-	player.sprite = love.graphics.newImage("player.png")
-	player.score = 0
+	player = Player(world, love.graphics.newImage("player.png"), SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 	table.insert(enteties, player)
 
 end
@@ -73,6 +64,10 @@ function love.update(dt)
 		objects.ball.body:applyForce(x * 400, y * 400)
 	end
 
+	for i, v in ipairs(enteties) do
+		v:update(dt)
+	end
+
 	-- Update NPC.
 	dtotal = dtotal + dt
 	if dtotal >= 1 then
@@ -85,8 +80,9 @@ function love.draw()
 	love.graphics.setColor(0, 160, 50)
 	love.graphics.polygon("fill", objects.ground.body:getWorldPoints(objects.ground.shape:getPoints()))
 
-	love.graphics.setColor(255, 255, 255)
-	love.graphics.draw(player.sprite, objects.ball.body:getX(), objects.ball.body:getY())
+	for i, v in ipairs(enteties) do
+		v:draw()
+	end
 
 	love.graphics.setColor(0, 60, 50)
 	love.graphics.print("Score: " .. player.score, 10, 10)
